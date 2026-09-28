@@ -3,16 +3,14 @@ import { useParams } from 'react-router-dom';
 import { movieService } from '../services/movieService';
 import type { MovieDetail, Review } from '../types/movie';
 
+import LogMovieModal from '../components/LogMovieModal';
+
 export default function MovieDetails() {
   const { id } = useParams<{ id: string }>();
   const [movie, setMovie] = useState<MovieDetail | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Review form state
-  const [nome, setNome] = useState('');
-  const [nota, setNota] = useState(5.0);
-  const [comentario, setComentario] = useState('');
+  const [isLogModalOpen, setIsLogModalOpen] = useState(false);
 
   const loadMovie = async () => {
     if (!id) return;
@@ -49,18 +47,9 @@ export default function MovieDetails() {
     loadMovie();
   }, [id]);
 
-  const handleSubmitReview = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!id) return;
-    try {
-      await movieService.addReview(id, { nome, nota, comentario });
-      setNome('');
-      setNota(5.0);
-      setComentario('');
-      loadMovie();
-    } catch (error) {
-      console.error('Error submitting review:', error);
-    }
+  const handleModalClose = () => {
+    setIsLogModalOpen(false);
+    loadMovie(); // Refresh reviews after logging
   };
 
   if (isLoading) {
@@ -125,63 +114,16 @@ export default function MovieDetails() {
               </p>
             </div>
 
-
-          </div>
-        </div>
-
-        {/* SEÇÃO INFERIOR: FORMULÁRIO DE REVIEW */}
-        <div className="border-t border-gray-700/50 pt-8 mt-2">
-          <div className="bg-[#2c3440] p-6 rounded-md shadow-lg border border-[#1b2228] max-w-2xl mx-auto">
-            <h3 className="text-white font-bold mb-4 uppercase tracking-wider text-sm">Review this film</h3>
-            <form onSubmit={handleSubmitReview} className="flex flex-col gap-4">
-              <input 
-                type="text" 
-                placeholder="Your name"
-                value={nome} 
-                onChange={(e) => setNome(e.target.value)} 
-                required 
-                className="bg-[#14181c] text-white border border-gray-700/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#00e054]"
-              />
-              <div className="flex items-center justify-between bg-[#14181c] border border-gray-700/50 rounded px-3 py-2">
-                <span className="text-xs uppercase tracking-wider text-gray-400">Rating</span>
-                <div className="flex items-center gap-2">
-                  <div className="flex gap-1 cursor-pointer">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <div key={star} className="relative w-6 h-6">
-                        <span className="absolute text-2xl leading-6 text-gray-600">★</span>
-                        <span 
-                          className="absolute text-2xl leading-6 text-[#00e054] overflow-hidden"
-                          style={{ width: nota >= star ? '100%' : (nota >= star - 0.5 ? '50%' : '0%') }}
-                        >★</span>
-                        <div 
-                          className="absolute left-0 w-1/2 h-full z-10"
-                          onClick={() => setNota(star - 0.5)}
-                        />
-                        <div 
-                          className="absolute right-0 w-1/2 h-full z-10"
-                          onClick={() => setNota(star)}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  <span className="text-[#00e054] font-bold text-sm w-6 text-right">{nota.toFixed(1)}</span>
-                </div>
-              </div>
-              <textarea 
-                placeholder="Write your review..." 
-                value={comentario} 
-                onChange={(e) => setComentario(e.target.value)} 
-                required 
-                rows={4}
-                className="bg-[#14181c] text-white border border-gray-700/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#00e054] resize-none"
-              />
+            {/* BOTÃO PARA LOGAR O FILME */}
+            <div className="mt-4">
               <button 
-                type="submit" 
-                className="bg-[#00e054] hover:bg-[#00c04b] text-white font-bold py-2 px-4 rounded transition-colors uppercase tracking-wider text-sm self-end"
+                onClick={() => setIsLogModalOpen(true)}
+                className="bg-[#2c3440] hover:bg-[#445566] text-[#8b9bab] hover:text-white transition-colors py-2 px-4 rounded text-xs font-bold uppercase tracking-widest border border-[#445566] shadow-sm"
               >
-                Save Review
+                Review or log...
               </button>
-            </form>
+            </div>
+
           </div>
         </div>
 
@@ -213,6 +155,7 @@ export default function MovieDetails() {
         </div>
         
       </div>
+      {isLogModalOpen && <LogMovieModal initialMovie={movie as any} onClose={handleModalClose} />}
     </div>
   );
 }

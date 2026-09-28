@@ -1,14 +1,44 @@
-import { useState } from 'react';
-import { Routes, Route, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Routes, Route, Link, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
 import MovieDetails from './pages/MovieDetails';
 import Admin from './pages/Admin';
 import UserProfile from './pages/UserProfile';
+import Login from './pages/Login';
 import LogMovieModal from './components/LogMovieModal';
 import './App.css';
 
 function App() {
   const [isLogOpen, setIsLogOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<string | null>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('activeUser');
+    if (saved) setCurrentUser(saved);
+  }, []);
+
+  const handleLogin = (username: string) => {
+    setCurrentUser(username);
+    localStorage.setItem('activeUser', username);
+    
+    // Ensure profile data exists for this user in localStorage
+    const profileKey = `profile_${username}`;
+    if (!localStorage.getItem(profileKey)) {
+      localStorage.setItem(profileKey, JSON.stringify({
+        username,
+        films_count: 0
+      }));
+    }
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    localStorage.removeItem('activeUser');
+  };
+
+  if (!currentUser) {
+    return <Login onLogin={handleLogin} />;
+  }
 
   return (
     <div className="app-wrapper">
@@ -28,10 +58,19 @@ function App() {
           
           <nav style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
             <Link to="/" className="hover:text-white transition-colors" style={{ color: '#8b9bab', letterSpacing: '0.1em', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', textDecoration: 'none' }}>FILMS</Link>
+            <Link to="/profile" className="hover:text-white transition-colors" style={{ color: '#8b9bab', letterSpacing: '0.1em', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', textDecoration: 'none' }}>PROFILE</Link>
             <Link to="/admin" className="hover:text-white transition-colors" style={{ color: '#8b9bab', letterSpacing: '0.1em', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', textDecoration: 'none' }}>ADMIN</Link>
             
             <button className="hover:text-white transition-colors" style={{ color: '#8b9bab', fontSize: '18px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
               ⚲
+            </button>
+
+            <button 
+              onClick={handleLogout}
+              className="hover:text-white transition-colors" 
+              style={{ color: '#8b9bab', letterSpacing: '0.1em', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', textDecoration: 'none', background: 'none', border: 'none', cursor: 'pointer' }}
+            >
+              LOGOUT
             </button>
             
             <button 
@@ -50,6 +89,7 @@ function App() {
           <Route path="/movie/:id" element={<MovieDetails />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/profile" element={<UserProfile />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
       

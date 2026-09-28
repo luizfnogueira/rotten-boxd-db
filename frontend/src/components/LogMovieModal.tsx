@@ -5,17 +5,20 @@ import './modal.css';
 
 interface Props {
   onClose: () => void;
+  initialMovie?: Movie | null;
 }
 
-export default function LogMovieModal({ onClose }: Props) {
-  const [step, setStep] = useState<'search' | 'log'>('search');
+export default function LogMovieModal({ onClose, initialMovie = null }: Props) {
+  const [step, setStep] = useState<'search' | 'log'>(initialMovie ? 'log' : 'search');
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Movie[]>([]);
-  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(initialMovie);
 
   const [review, setReview] = useState('');
   const [rating, setRating] = useState('3.5');
-  const [name, setName] = useState('User');
+  
+  const activeUser = localStorage.getItem('activeUser') || 'User';
+  const [name, setName] = useState(activeUser);
 
   useEffect(() => {
     if (query.length > 2) {
@@ -37,6 +40,16 @@ export default function LogMovieModal({ onClose }: Props) {
         nota: parseFloat(rating),
         comentario: review
       });
+      
+      // Increment local profile films_count
+      const profileKey = `profile_${name}`;
+      const profileData = localStorage.getItem(profileKey);
+      if (profileData) {
+        const parsed = JSON.parse(profileData);
+        parsed.films_count = (parsed.films_count || 0) + 1;
+        localStorage.setItem(profileKey, JSON.stringify(parsed));
+      }
+      
       onClose();
     }
   };
@@ -48,7 +61,7 @@ export default function LogMovieModal({ onClose }: Props) {
           <div className="modal-header-left">
             {step === 'log' ? (
               <>
-                <button className="btn-back" onClick={() => setStep('search')}>{'< BACK'}</button>
+                {!initialMovie && <button className="btn-back" onClick={() => setStep('search')}>{'< BACK'}</button>}
                 <h3 className="modal-title">I watched...</h3>
               </>
             ) : (
@@ -123,14 +136,10 @@ export default function LogMovieModal({ onClose }: Props) {
                   </div>
 
                   <div className="modal-input-group">
-                    <label>Your Name</label>
-                    <input 
-                      type="text" 
-                      className="modal-tags-input" 
-                      style={{ width: '120px' }} 
-                      value={name}
-                      onChange={e => setName(e.target.value)}
-                    />
+                    <label>Profile</label>
+                    <div className="text-white font-bold" style={{ paddingTop: '8px' }}>
+                      @{name}
+                    </div>
                   </div>
                 </div>
               </div>
