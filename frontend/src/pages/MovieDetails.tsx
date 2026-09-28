@@ -56,6 +56,17 @@ export default function MovieDetails() {
       <div className="details-info">
         <h1 className="details-title">{movie.titulo} <span style={{color: 'var(--text-muted)'}}>{movie.ano_lancamento}</span></h1>
         
+        {movie.reviews_summary?.nota_media_usuarios && (
+          <div className="details-rating" style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '10px 0' }}>
+            <span className="stars" style={{ fontSize: '1.2rem' }}>
+              {'★'.repeat(Math.round(movie.reviews_summary.nota_media_usuarios))}
+            </span>
+            <span style={{ color: 'var(--text-muted)' }}>
+              {movie.reviews_summary.nota_media_usuarios.toFixed(1)} / 5.0 ({movie.reviews_summary.qtd_avaliacoes_usuarios} reviews)
+            </span>
+          </div>
+        )}
+        
         {movie.diretor && (
           <div className="details-director">
             Directed by <strong>{movie.diretor}</strong>
