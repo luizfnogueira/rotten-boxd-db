@@ -10,7 +10,7 @@ export default function MovieDetails() {
   
   // Review form state
   const [nome, setNome] = useState('');
-  const [nota, setNota] = useState(5);
+  const [nota, setNota] = useState(5.0);
   const [comentario, setComentario] = useState('');
 
   const loadMovie = async () => {
@@ -34,122 +34,133 @@ export default function MovieDetails() {
     try {
       await movieService.addReview(id, { nome, nota, comentario });
       setNome('');
-      setNota(5);
+      setNota(5.0);
       setComentario('');
-      loadMovie(); // refresh reviews and summary
+      loadMovie();
     } catch (error) {
       console.error('Error submitting review:', error);
     }
   };
 
-  if (!movie) return <div>Loading...</div>;
+  if (!movie) return <div className="state-message">Carregando detalhes...</div>;
 
   return (
-    <div style={{ display: 'flex', gap: '40px', marginTop: '20px' }}>
-      <div style={{ width: '250px', flexShrink: 0 }}>
-        <img 
-          src={movie.url_poster || 'https://placehold.co/300x450/1b252d/ffffff?text=Poster'} 
-          alt={movie.titulo} 
-          style={{ width: '100%', borderRadius: '4px', boxShadow: '0 0 10px rgba(0,0,0,0.5)', border: '1px solid #445566' }}
-        />
-        {movie.reviews_summary?.nota_media_usuarios && (
-          <div style={{ marginTop: '15px', textAlign: 'center', background: '#2c3440', padding: '10px', borderRadius: '4px' }}>
-            <div style={{ fontSize: '0.8rem', color: '#8b9bab', textTransform: 'uppercase' }}>Ratings</div>
-            <div style={{ fontSize: '1.5rem', color: '#00e054', fontWeight: 'bold' }}>
-              {movie.reviews_summary.nota_media_usuarios.toFixed(1)} <span style={{fontSize: '1rem', color: '#8b9bab'}}>/ 5.0</span>
+    <section className="panel-grid">
+      <aside className="panel left-panel">
+        <div className="movie-card-poster-wrap" style={{ marginBottom: '20px' }}>
+          <img 
+            src={movie.url_poster || 'https://placehold.co/300x450/1b252d/ffffff?text=Poster'} 
+            alt={movie.titulo} 
+            style={{ width: '100%', borderRadius: '8px', boxShadow: '0 8px 18px rgba(0,0,0,0.3)', display: 'block' }}
+          />
+          {movie.reviews_summary?.nota_media_usuarios != null && (
+            <div className="movie-card-score" style={{ fontSize: '1rem', padding: '8px 12px', right: '-10px', bottom: '-10px' }}>
+              {movie.reviews_summary.nota_media_usuarios.toFixed(1)}
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+        <div className="panel-header" style={{ marginTop: '20px' }}>
+          <h3>Estatísticas</h3>
+        </div>
+        <p className="panel-helper">
+          {movie.reviews_summary?.qtd_avaliacoes_usuarios || 0} avaliações na comunidade.
+        </p>
+      </aside>
 
-      <div style={{ flexGrow: 1 }}>
-        <h1 style={{ margin: '0 0 10px 0', fontSize: '2.5rem', fontFamily: 'serif' }}>
-          {movie.titulo} <span style={{ fontSize: '1.2rem', color: '#8b9bab', fontWeight: 'normal', fontFamily: 'sans-serif' }}>{movie.ano_lancamento}</span>
-        </h1>
+      <div className="panel right-panel" style={{ gridColumn: 'span 2' }}>
+        <div className="diary-header-row" style={{ marginBottom: '16px' }}>
+          <h3>{movie.titulo}</h3>
+          <span className="diary-year">{movie.ano_lancamento}</span>
+        </div>
         
         {movie.diretor && (
-          <div style={{ fontSize: '1rem', color: '#8b9bab', marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #445566' }}>
-            Directed by <strong style={{ color: '#c0c9d1' }}>{movie.diretor}</strong>
+          <div className="diary-meta-row" style={{ marginBottom: '20px' }}>
+            <span style={{ color: 'var(--letterboxd-text-soft)' }}>Dirigido por</span> <strong>{movie.diretor}</strong>
           </div>
         )}
         
-        <p style={{ fontSize: '1.1rem', lineHeight: '1.6', color: '#9ab' }}>
+        <p style={{ lineHeight: '1.7', color: 'var(--letterboxd-text)', marginBottom: '20px' }}>
           {movie.sinopse}
         </p>
 
         {movie.genero && (
-          <div style={{ marginTop: '20px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '40px' }}>
             {movie.genero.split(',').map((g, i) => (
-              <span key={i} style={{ background: '#2c3440', color: '#8b9bab', padding: '4px 8px', borderRadius: '3px', fontSize: '0.8rem', textTransform: 'uppercase' }}>
+              <span key={i} className="ghost-button">
                 {g.trim()}
               </span>
             ))}
           </div>
         )}
 
-        <div style={{ marginTop: '40px' }}>
-          <h3 style={{ textTransform: 'uppercase', color: '#8b9bab', fontSize: '0.9rem', borderBottom: '1px solid #445566', paddingBottom: '5px' }}>Add a Review</h3>
-          <form onSubmit={handleSubmitReview} style={{ background: '#2c3440', padding: '20px', borderRadius: '4px', marginTop: '15px' }}>
-            <div style={{ display: 'flex', gap: '20px', marginBottom: '15px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', color: '#8b9bab', marginBottom: '5px' }}>Your Name</label>
-                <input 
-                  type="text" 
-                  style={{ background: '#1b2228', border: '1px solid #445566', color: '#fff', padding: '8px', borderRadius: '3px' }}
-                  value={nome} 
-                  onChange={(e) => setNome(e.target.value)} 
-                  required 
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', color: '#8b9bab', marginBottom: '5px' }}>Rating</label>
-                <div style={{ display: 'flex', gap: '2px', fontSize: '1.5rem', cursor: 'pointer' }}>
+        <div className="panel" style={{ marginBottom: '40px', background: 'rgba(10, 16, 20, 0.45)' }}>
+          <h3 style={{ marginBottom: '16px' }}>Adicionar uma Avaliação</h3>
+          <form onSubmit={handleSubmitReview}>
+            <div style={{ display: 'flex', gap: '20px', marginBottom: '16px', flexWrap: 'wrap' }}>
+              <input 
+                type="text" 
+                placeholder="Seu nome"
+                value={nome} 
+                onChange={(e) => setNome(e.target.value)} 
+                required 
+                style={{ flex: 1, minWidth: '200px' }}
+              />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ color: 'var(--letterboxd-text-soft)', textTransform: 'uppercase', fontSize: '0.8rem', fontWeight: 'bold' }}>Nota:</span>
+                <div style={{ display: 'flex', gap: '4px', cursor: 'pointer', position: 'relative' }}>
                   {[1, 2, 3, 4, 5].map((star) => (
-                    <span 
-                      key={star} 
-                      onClick={() => setNota(star)}
-                      style={{ color: star <= nota ? '#00e054' : '#445566' }}
-                    >★</span>
+                    <div key={star} style={{ position: 'relative', width: '24px', height: '24px' }}>
+                      <span style={{ position: 'absolute', fontSize: '1.5rem', color: 'rgba(255,255,255,0.22)', lineHeight: '24px' }}>★</span>
+                      <span style={{ position: 'absolute', fontSize: '1.5rem', color: 'var(--letterboxd-green)', lineHeight: '24px', overflow: 'hidden', width: nota >= star ? '100%' : (nota >= star - 0.5 ? '50%' : '0%') }}>★</span>
+                      <div 
+                        style={{ position: 'absolute', left: 0, width: '50%', height: '100%', zIndex: 10 }}
+                        onClick={() => setNota(star - 0.5)}
+                      />
+                      <div 
+                        style={{ position: 'absolute', right: 0, width: '50%', height: '100%', zIndex: 10 }}
+                        onClick={() => setNota(star)}
+                      />
+                    </div>
                   ))}
                 </div>
+                <span style={{ color: 'var(--letterboxd-green)', fontWeight: 'bold' }}>{nota.toFixed(1)}</span>
               </div>
             </div>
             <textarea 
-              placeholder="Write your review..." 
-              style={{ width: '100%', background: '#1b2228', border: '1px solid #445566', color: '#fff', padding: '10px', borderRadius: '3px', minHeight: '80px', marginBottom: '15px' }}
+              placeholder="Escreva sua resenha..." 
               value={comentario} 
               onChange={(e) => setComentario(e.target.value)} 
               required 
+              style={{ marginBottom: '16px' }}
             />
             <div style={{ textAlign: 'right' }}>
-              <button type="submit" style={{ background: '#00e054', color: '#fff', border: 'none', padding: '8px 20px', borderRadius: '3px', fontWeight: 'bold', cursor: 'pointer' }}>Save Review</button>
+              <button type="submit" className="primary-button">Salvar Resenha</button>
             </div>
           </form>
         </div>
 
-        <div style={{ marginTop: '40px' }}>
-          <h3 style={{ textTransform: 'uppercase', color: '#8b9bab', fontSize: '0.9rem', borderBottom: '1px solid #445566', paddingBottom: '5px' }}>Reviews</h3>
-          <div style={{ marginTop: '15px' }}>
-            {reviews.length === 0 ? <p style={{ color: '#8b9bab' }}>No reviews yet. Be the first!</p> : (
+        <div>
+          <h3 style={{ marginBottom: '20px' }}>Resenhas da Comunidade</h3>
+          <div className="user-reviews-grid">
+            {reviews.length === 0 ? (
+              <div className="empty-section">
+                Nenhuma resenha ainda. Seja o primeiro!
+              </div>
+            ) : (
               reviews.map(r => (
-                <div key={r.sk_movie_review_id} style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #2c3440', display: 'flex', gap: '15px' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#445566', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: '#fff', flexShrink: 0 }}>
+                <div key={r.sk_movie_review_id} className="user-review-card">
+                  <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', color: 'var(--letterboxd-white)', fontWeight: 'bold', flexShrink: 0 }}>
                     {r.nome.charAt(0).toUpperCase()}
                   </div>
-                  <div>
-                    <div style={{ fontSize: '0.9rem', color: '#8b9bab' }}>
-                      Review by <strong style={{ color: '#fff' }}>{r.nome}</strong>
+                  <div className="user-review-body">
+                    <div className="user-review-header">
+                      <h3>{r.nome}</h3>
                     </div>
-                    <div style={{ color: '#00e054', fontSize: '1.2rem', margin: '5px 0' }}>
-                      {'★'.repeat(Math.round(r.nota))}
+                    <div className="user-review-meta">
+                      <span className="user-review-score">{'★'.repeat(Math.floor(r.nota))}{r.nota % 1 !== 0 ? '½' : ''}</span>
+                      <span>Assistido em {new Date(r.created_at || Date.now()).toLocaleDateString()}</span>
                     </div>
-                    <div style={{ fontSize: '0.8rem', color: '#8b9bab', marginBottom: '10px' }}>
-                      Watched on {new Date(r.created_at || Date.now()).toLocaleDateString()}
-                    </div>
-                    <p style={{ color: '#c0c9d1', lineHeight: '1.5', margin: 0 }}>{r.comentario}</p>
-                    <div style={{ marginTop: '15px', color: '#8b9bab', fontSize: '0.8rem', cursor: 'pointer' }}>
-                      ♥ Like review
-                    </div>
+                    <p className="user-review-comment">{r.comentario}</p>
                   </div>
                 </div>
               ))
@@ -157,6 +168,6 @@ export default function MovieDetails() {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

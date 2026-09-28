@@ -1,72 +1,92 @@
-# RocketLab 2026.2 — repositório base
+# RottenBoxdbd
 
-Base inicial para evoluir a atividade do RocketLab 2026.2. Ela preserva a organização do backend,
-o modelo relacional do catálogo de filmes em SQLAlchemy 2.0 e o histórico de
-migrações com Alembic, sem incluir interface, dados CSV, endpoints de negócio
-ou rotinas de carga.
+O **RottenBoxdbd** é uma plataforma full-stack inspirada no ecossistema do Letterboxd, projetada para a gestão de catálogos cinematográficos, registro de resenhas e acompanhamento de atividades personalizadas. O projeto aplica arquitetura assíncrona no backend com FastAPI e uma interface construída em React, Vite, TypeScript e TailwindCSS.
 
-> **Nota:** `RocketLab` é apenas o nome de referência desta base. O diretório,
-> nome do pacote, título da API e arquivo do banco podem ser renomeados para o
-> que preferirem; eles não representam uma exigência da
-> estrutura-base.
+Desenvolvido por **luizfnogueira**.
 
-## Estrutura
+---
+
+## Diferenciais Técnicos e Arquitetura
+
+### Arquitetura de Código e Organização
+
+A estrutura do projeto adota uma separação clara de responsabilidades entre backend e frontend, facilitando a manutenção e expansão.
 
 ```text
-.
+rotten-boxd-db/
 ├── backend/
 │   ├── app/
-│   │   ├── api/v1/        # ponto de composição dos futuros routers
-│   │   ├── core/          # configurações e logging
-│   │   ├── db/            # Base ORM, engine e sessões
-│   │   └── movies/        # modelos SQLAlchemy do domínio de filmes
-│   ├── migrations/        # ambiente e revisões Alembic
-│   └── tests/
-└── README.md
+│   │   ├── api/          # Endpoints REST
+│   │   ├── core/         # Configurações globais e inicialização de BD
+│   │   ├── models/       # Entidades SQLAlchemy (Movie, Review)
+│   │   ├── schemas/      # Validações estritas Pydantic
+│   │   └── main.py       # Ponto de entrada FastAPI e middlewares CORS
+│   └── tests/            # Testes
+└── frontend/
+    ├── src/
+    │   ├── components/   # Componentes modulares
+    │   ├── pages/        # Páginas principais da aplicação
+    │   ├── services/     # Cliente HTTP
+    │   └── types/        # Definições globais de interfaces TypeScript
+    └── vite.config.ts    # Configurações do bundler
 ```
 
-## Execução
+---
 
-Requer Python 3.11 ou superior.
+## Instruções de Execução
 
-```bash
+### Pré-requisitos
+
+* Python 3.10+ instalado
+* Node.js 18+ e npm instalados
+
+---
+
+### 1. Configurar e Subir o Backend (FastAPI)
+
+Navegue até a pasta do backend, crie o ambiente virtual e instale as dependências:
+
+```powershell
 cd backend
-python3 -m venv .venv
-.venv/bin/pip install -e ".[dev]"
-cp .env.example .env
-.venv/bin/alembic upgrade head
-.venv/bin/uvicorn app.main:app --reload
+python -m venv .venv
+
+# Ativação no Windows (PowerShell)
+.\.venv\Scripts\Activate.ps1
+
+# Ativação no Linux/macOS
+# source .venv/bin/activate
+
+pip install -r requirements.txt
 ```
 
-A API mínima ficará disponível em `http://localhost:8000`; use
-`http://localhost:8000/docs` para a documentação automática. O endpoint
-`GET /health` permite conferir se a aplicação iniciou corretamente.
+---
 
-## Banco de dados e migrações
+### 2. Popular o Banco de Dados (Carga Inicial / Seed)
 
-O modelo usa um esquema estrela para o catálogo de filmes:
+Com o ambiente virtual ativo, execute a carga inicial dos dados para popular o banco SQLite local com filmes e metadados:
 
-- dimensões de filmes, gêneros, pessoas, produtoras e resumo de avaliações;
-- fato de desempenho financeiro e de engajamento;
-- tabelas de associação N:N entre filmes, gêneros, produtoras e pessoas;
-
-O schema corresponde aos nove arquivos CSV atuais da camada Diamond, com a
-adição de `movie_reviews`: uma avaliação individual por linha, na escala 0–10.
-A tabela aceita diretamente as colunas `sk_movie_review_id`, `sk_movie_id`,
-`nome`, `nota` e `comentario` do CSV enviado separadamente. `created_at` é
-gerado pelo banco. O contexto generativo não faz parte desta base.
-
-O repositório não inclui CSVs nem rotinas de carga. Para usar avaliações,
-importe primeiro os filmes em `dim_movies` e depois o CSV de `movie_reviews`.
-
-As tabelas são criadas exclusivamente pelo Alembic. Para evoluir os modelos,
-crie uma revisão e aplique-a:
-
-```bash
-cd backend
-.venv/bin/alembic revision --autogenerate -m "descreva a alteração"
-.venv/bin/alembic upgrade head
+```powershell
+python -m app.db.seed
 ```
 
-O banco padrão é SQLite local em `backend/rocketlab.db`. Ajuste
-`DATABASE_URL` no arquivo `.env` para usar outro banco compatível.
+Após a conclusão da carga, inicie o servidor backend:
+
+```powershell
+uvicorn app.main:app --reload
+```
+
+A API estará disponível em `http://localhost:8000` (documentação Swagger interativa ativa em `http://localhost:8000/docs`).
+
+---
+
+### 3. Configurar e Subir o Frontend (React / Vite)
+
+Em um novo terminal, acesse a pasta do frontend, instale as dependências e inicie a aplicação:
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+Acesse a aplicação no navegador em `http://localhost:5173`.

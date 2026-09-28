@@ -291,25 +291,22 @@ async def seed():
 
         print("  [8/8] bridges N:N (genre, company, person)...")
         with open(DATA_DIR / "bridge_movie_genre.csv", encoding="utf-8") as f:
-            for r in csv.DictReader(f):
-                await session.execute(bridge_movie_genre.insert().values(
-                    sk_movie_id=r["sk_movie_id"],
-                    sk_genre_id=r["sk_genre_id"],
-                ))
+            records = [{"sk_movie_id": r["sk_movie_id"], "sk_genre_id": r["sk_genre_id"]} for r in csv.DictReader(f)]
+            if records:
+                for i in range(0, len(records), 5000):
+                    await session.execute(bridge_movie_genre.insert(), records[i:i+5000])
 
         with open(DATA_DIR / "bridge_movie_company.csv", encoding="utf-8") as f:
-            for r in csv.DictReader(f):
-                await session.execute(bridge_movie_company.insert().values(
-                    sk_movie_id=r["sk_movie_id"],
-                    sk_company_id=r["sk_company_id"],
-                ))
+            records = [{"sk_movie_id": r["sk_movie_id"], "sk_company_id": r["sk_company_id"]} for r in csv.DictReader(f)]
+            if records:
+                for i in range(0, len(records), 5000):
+                    await session.execute(bridge_movie_company.insert(), records[i:i+5000])
 
         with open(DATA_DIR / "bridge_movie_person.csv", encoding="utf-8") as f:
-            for r in csv.DictReader(f):
-                await session.execute(bridge_movie_person.insert().values(
-                    sk_movie_id=r["sk_movie_id"],
-                    sk_person_id=r["sk_person_id"],
-                ))
+            records = [{"sk_movie_id": r["sk_movie_id"], "sk_person_id": r["sk_person_id"]} for r in csv.DictReader(f)]
+            if records:
+                for i in range(0, len(records), 5000):
+                    await session.execute(bridge_movie_person.insert(), records[i:i+5000])
 
         await session.commit()
         print("✅ Carga completa finalizada com sucesso!")
