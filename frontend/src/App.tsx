@@ -12,35 +12,39 @@ function App() {
 
   return (
     <div className="app-wrapper">
-      <header className="bg-[#14181c] border-b border-[#2c3440] py-6 px-8 text-white text-xs font-semibold tracking-wider font-sans">
-        <div className="max-w-[1000px] mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="flex gap-1">
-              <span className="w-4 h-4 rounded-full bg-[#ff8000]"></span>
-              <span className="w-4 h-4 rounded-full bg-[#00e054]"></span>
-              <span className="w-4 h-4 rounded-full bg-[#40bcf4]"></span>
-            </span>
-            <span className="text-2xl font-bold font-serif tracking-tight ml-2">RottenBoxdbd</span>
-          </div>
+      <header style={{ backgroundColor: '#14181c', borderBottom: '1px solid #2c3440', padding: '1.5rem 2rem', fontFamily: 'GraphikWeb, -apple-system, sans-serif' }}>
+        <div style={{ maxWidth: '960px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           
-          <nav className="flex items-center gap-6 md:gap-8">
-            <Link to="/" className="hover:text-white text-gray-300 tracking-widest text-[11px] mr-6">FILMS</Link>
-            <Link to="/admin" className="hover:text-white text-gray-300 tracking-widest text-[11px] mr-6">ADMIN</Link>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
+            <span style={{ display: 'flex', gap: '4px' }}>
+              <span style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#ff8000' }}></span>
+              <span style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#00e054' }}></span>
+              <span style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#40bcf4' }}></span>
+            </span>
+            <span style={{ fontSize: '1.75rem', fontWeight: 'bold', color: '#fff', letterSpacing: '-0.05em', fontFamily: 'TiemposHeadlineWeb, Georgia, serif', marginLeft: '8px' }}>
+              RottenBoxdbd
+            </span>
+          </Link>
+          
+          <nav style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+            <Link to="/" className="hover:text-white transition-colors" style={{ color: '#8b9bab', letterSpacing: '0.1em', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', textDecoration: 'none' }}>FILMS</Link>
+            <Link to="/admin" className="hover:text-white transition-colors" style={{ color: '#8b9bab', letterSpacing: '0.1em', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', textDecoration: 'none' }}>ADMIN</Link>
             
-            <button className="text-gray-300 hover:text-white text-lg mr-4">
+            <button className="hover:text-white transition-colors" style={{ color: '#8b9bab', fontSize: '18px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
               ⚲
             </button>
             
             <button 
-              className="bg-[#00e054] hover:bg-[#00c04b] text-white px-4 py-2 rounded flex items-center gap-2 transition-colors font-bold tracking-wider"
+              className="hover:bg-[#00c04b] transition-colors"
               onClick={() => setIsLogOpen(true)}
+              style={{ backgroundColor: '#00e054', color: '#fff', padding: '0.5rem 1rem', borderRadius: '3px', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold', letterSpacing: '0.1em', border: 'none', cursor: 'pointer', textTransform: 'uppercase', fontSize: '12px' }}
             >
               + LOG
             </button>
           </nav>
         </div>
       </header>
-      <main className="app-shell">
+      <main className="app-shell" style={{ backgroundColor: '#14181c', minHeight: 'calc(100vh - 72px)' }}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/movie/:id" element={<MovieDetails />} />

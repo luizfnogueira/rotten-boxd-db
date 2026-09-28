@@ -8,7 +8,7 @@ export default function Home() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const size = 18;
+  const size = 14; // Mudado de 18 para 14 para fechar 2 linhas de 7 certinho
 
   useEffect(() => {
     const fetchMovies = async () => {
@@ -46,27 +46,51 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="grid gap-4 mt-6" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))' }}>
+      <div className="grid mt-6" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '2rem' }}>
         {movies.map(movie => (
           <MovieCard key={movie.sk_movie_id} movie={movie} />
         ))}
       </div>
 
-      <div className="flex justify-center items-center gap-4 mt-12 pt-8 border-t border-gray-700/50">
+      <div className="flex justify-center items-center gap-8 mt-16 pt-8 border-t border-[#2c3440] pb-12">
         <button 
-          className="px-4 py-2 bg-transparent text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-sm uppercase tracking-wider"
+          className="flex items-center gap-2 px-5 py-2.5 rounded text-[11px] font-bold uppercase tracking-[0.15em] transition-all duration-200"
+          style={{
+             backgroundColor: page === 1 ? 'transparent' : '#2c3440',
+             color: page === 1 ? '#455566' : '#fff',
+             border: page === 1 ? '1px solid #2c3440' : '1px solid #455566',
+             cursor: page === 1 ? 'not-allowed' : 'pointer',
+             boxShadow: page === 1 ? 'none' : '0 4px 6px rgba(0,0,0,0.2)',
+             opacity: page === 1 ? 0.5 : 1
+          }}
           disabled={page === 1} 
-          onClick={() => setPage(p => p - 1)}>
-          Anterior
+          onClick={() => setPage(p => p - 1)}
+          onMouseOver={(e) => { if (page !== 1) e.currentTarget.style.backgroundColor = '#455566' }}
+          onMouseOut={(e) => { if (page !== 1) e.currentTarget.style.backgroundColor = '#2c3440' }}
+        >
+          ← Anterior
         </button>
+
         <span className="text-[#8b9bab] text-xs uppercase tracking-widest">
           {page} <span className="mx-1">/</span> {totalPages}
         </span>
+
         <button 
-          className="px-4 py-2 bg-transparent text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-sm uppercase tracking-wider"
+          className="flex items-center gap-2 px-5 py-2.5 rounded text-[11px] font-bold uppercase tracking-[0.15em] transition-all duration-200"
+          style={{
+             backgroundColor: page >= totalPages ? 'transparent' : '#2c3440',
+             color: page >= totalPages ? '#455566' : '#fff',
+             border: page >= totalPages ? '1px solid #2c3440' : '1px solid #455566',
+             cursor: page >= totalPages ? 'not-allowed' : 'pointer',
+             boxShadow: page >= totalPages ? 'none' : '0 4px 6px rgba(0,0,0,0.2)',
+             opacity: page >= totalPages ? 0.5 : 1
+          }}
           disabled={page >= totalPages} 
-          onClick={() => setPage(p => p + 1)}>
-          Próxima
+          onClick={() => setPage(p => p + 1)}
+          onMouseOver={(e) => { if (page < totalPages) e.currentTarget.style.backgroundColor = '#455566' }}
+          onMouseOut={(e) => { if (page < totalPages) e.currentTarget.style.backgroundColor = '#2c3440' }}
+        >
+          Próxima →
         </button>
       </div>
     </div>
