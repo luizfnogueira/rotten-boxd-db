@@ -24,10 +24,10 @@ function App() {
           </div>
           
           <nav className="flex items-center gap-6 md:gap-8">
-            <Link to="/" className="hover:text-white text-gray-300 tracking-widest text-[11px]">FILMS</Link>
-            <Link to="/admin" className="hover:text-white text-gray-300 tracking-widest text-[11px]">ADMIN</Link>
+            <Link to="/" className="hover:text-white text-gray-300 tracking-widest text-[11px] mr-6">FILMS</Link>
+            <Link to="/admin" className="hover:text-white text-gray-300 tracking-widest text-[11px] mr-6">ADMIN</Link>
             
-            <button className="text-gray-300 hover:text-white text-lg">
+            <button className="text-gray-300 hover:text-white text-lg mr-4">
               ⚲
             </button>
             

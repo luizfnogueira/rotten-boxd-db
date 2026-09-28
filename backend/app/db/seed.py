@@ -11,6 +11,7 @@ Estratégia:
 """
 import csv
 import asyncio
+import re
 from collections import defaultdict
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
@@ -81,6 +82,15 @@ def convert_to_1_to_5(val: float | None) -> float | None:
         return None
     v = val / 2.0
     return max(1.0, min(5.0, v))
+
+def format_title(title: str | None) -> str | None:
+    if not title or title.strip() == "":
+        return None
+    title = title.title()
+    def roman_repl(match):
+        return match.group(0).upper()
+    title = re.sub(r'\b(Iii|Ii|Iv|Vi|Vii|Viii|Ix|X|Xi|Xii|Xiii|Xiv|Xv)\b', roman_repl, title)
+    return title.strip()
 
 # ---------------------------------------------------------------------------
 # Seed principal
@@ -203,18 +213,30 @@ async def seed():
         with open(DATA_DIR / "dim_movies.csv", encoding="utf-8") as f:
             for r in csv.DictReader(f):
                 sk = r["sk_movie_id"]
+                titulo = format_title(r.get("titulo"))
+                sinopse = r.get("sinopse")
+                diretor = get_diretor(sk)
+
+                # Validação de Nulos e Corrompidos: Pular se faltar essenciais
+                if not titulo or not sinopse or not diretor:
+                    continue
+
+                url_poster = r.get("url_poster")
+                if not url_poster or not url_poster.startswith('http'):
+                    url_poster = "https://placehold.co/300x450/1b252d/ffffff?text=Filme+Sem+Foto"
+
                 session.add(DimMovie(
                     sk_movie_id=sk,
                     id_filme=r["id_filme"],
-                    titulo=r["titulo"],
+                    titulo=titulo,
                     data_lancamento=parse_date(r.get("data_lancamento")),
                     ano_lancamento=parse_int(r.get("ano_lancamento")),
                     duracao_minutos=parse_int(r.get("duracao_minutos")),
                     status_filme=r.get("status_filme") or None,
-                    sinopse=r.get("sinopse") or None,
-                    url_poster=r.get("url_poster") or None,
+                    sinopse=sinopse,
+                    url_poster=url_poster,
                     url_backdrop=r.get("url_backdrop") or None,
-                    diretor=get_diretor(sk),
+                    diretor=diretor,
                     genero=get_genero(sk),
                 ))
         await session.commit()
