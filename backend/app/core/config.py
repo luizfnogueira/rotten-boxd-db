@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     environment: str = "local"
     api_v1_prefix: str = "/api/v1"
     database_url: str = "sqlite+aiosqlite:///./rocketlab.db"
-    backend_cors_origins: list[str] = ["http://localhost:5173"]
+    backend_cors_origins: list[str] = ["http://localhost:5173", "http://localhost:5174"]
     log_level: str = "INFO"
 
 

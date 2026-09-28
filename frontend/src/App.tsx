@@ -6,6 +6,7 @@ import Admin from './pages/Admin';
 import UserProfile from './pages/UserProfile';
 import Login from './pages/Login';
 import LogMovieModal from './components/LogMovieModal';
+import { userService } from './services/userService';
 import './App.css';
 
 function App() {
@@ -17,17 +18,15 @@ function App() {
     if (saved) setCurrentUser(saved);
   }, []);
 
-  const handleLogin = (username: string) => {
-    setCurrentUser(username);
-    localStorage.setItem('activeUser', username);
-    
-    // Ensure profile data exists for this user in localStorage
-    const profileKey = `profile_${username}`;
-    if (!localStorage.getItem(profileKey)) {
-      localStorage.setItem(profileKey, JSON.stringify({
-        username,
-        films_count: 0
-      }));
+  const handleLogin = async (username: string) => {
+    try {
+      // Cria (ou recupera) o usuário no backend para perfil/watchlist.
+      const user = await userService.loginOrCreate(username);
+      setCurrentUser(user.username);
+      localStorage.setItem('activeUser', user.username);
+    } catch (error) {
+      console.error('Error logging in:', error);
+      alert('Não foi possível conectar ao backend. Ele está rodando?');
     }
   };
 
@@ -45,13 +44,13 @@ function App() {
       <header style={{ backgroundColor: '#14181c', borderBottom: '1px solid #2c3440', padding: '1.5rem 2rem', fontFamily: 'GraphikWeb, -apple-system, sans-serif' }}>
         <div style={{ maxWidth: '960px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
-            <span style={{ display: 'flex', gap: '4px' }}>
-              <span style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#ff8000' }}></span>
-              <span style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#00e054' }}></span>
-              <span style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#40bcf4' }}></span>
-            </span>
-            <span style={{ fontSize: '1.75rem', fontWeight: 'bold', color: '#fff', letterSpacing: '-0.05em', fontFamily: 'TiemposHeadlineWeb, Georgia, serif', marginLeft: '8px' }}>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}>
+            <img
+              src="/logo.png"
+              alt="RottenBoxdbd"
+              style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #00e054' }}
+            />
+            <span style={{ fontSize: '1.75rem', fontWeight: 'bold', color: '#fff', letterSpacing: '-0.05em', fontFamily: 'TiemposHeadlineWeb, Georgia, serif' }}>
               RottenBoxdbd
             </span>
           </Link>

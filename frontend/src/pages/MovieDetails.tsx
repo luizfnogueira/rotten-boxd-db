@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { movieService } from '../services/movieService';
+import { userService } from '../services/userService';
 import type { MovieDetail, Review } from '../types/movie';
 
 import LogMovieModal from '../components/LogMovieModal';
+import StarRating, { starString } from '../components/StarRating';
 
 export default function MovieDetails() {
   const { id } = useParams<{ id: string }>();
@@ -11,8 +13,12 @@ export default function MovieDetails() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
+  const [inWatchlist, setInWatchlist] = useState(false);
+  const [watchlistBusy, setWatchlistBusy] = useState(false);
 
-  const loadMovie = async () => {
+  const activeUser = localStorage.getItem('activeUser');
+
+  const loadMovie = useCallback(async () => {
     if (!id) return;
     setIsLoading(true);
     try {
@@ -21,31 +27,42 @@ export default function MovieDetails() {
       setReviews(data.reviews || []);
     } catch (error) {
       console.error('Error loading movie:', error);
-      // Fallback with mock data if API fails
-      setMovie({
-        sk_movie_id: id,
-        id_filme: 'mock-123',
-        titulo: 'Bugonia',
-        ano_lancamento: 2025,
-        diretor: 'Yorgos Lanthimos',
-        sinopse: 'Two conspiracy obsessed young men kidnap the high-powered CEO of a major company, convinced that she is an alien intent on destroying planet Earth.',
-        url_poster: 'https://placehold.co/300x450/1b252d/ffffff?text=Bugonia',
-        genero: 'Comedy, Sci-Fi',
-        duracao_minutos: 118,
-        reviews_summary: {
-          nota_media_usuarios: 3.8,
-          qtd_avaliacoes_usuarios: 9200
-        }
-      });
+      setMovie(null);
       setReviews([]);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     loadMovie();
-  }, [id]);
+  }, [loadMovie]);
+
+  useEffect(() => {
+    if (!id || !activeUser) return;
+    userService
+      .getWatchlist(activeUser)
+      .then(entries => setInWatchlist(entries.some(e => e.movie.sk_movie_id === id)))
+      .catch(() => setInWatchlist(false));
+  }, [id, activeUser]);
+
+  const handleToggleWatchlist = async () => {
+    if (!id || !activeUser || watchlistBusy) return;
+    setWatchlistBusy(true);
+    try {
+      if (inWatchlist) {
+        await userService.removeFromWatchlist(activeUser, id);
+        setInWatchlist(false);
+      } else {
+        await userService.addToWatchlist(activeUser, id);
+        setInWatchlist(true);
+      }
+    } catch (error) {
+      console.error('Error updating watchlist:', error);
+    } finally {
+      setWatchlistBusy(false);
+    }
+  };
 
   const handleModalClose = () => {
     setIsLogModalOpen(false);
@@ -60,18 +77,17 @@ export default function MovieDetails() {
     return <div className="text-center py-20 text-gray-400">Filme não encontrado.</div>;
   }
 
-
-
   const posterUrl = movie.url_poster || 'https://placehold.co/300x450/1b252d/ffffff?text=Poster';
   const notaMedia = movie.reviews_summary?.nota_media_usuarios || 0;
+  const qtdAvaliacoes = movie.reviews_summary?.qtd_avaliacoes_usuarios || 0;
 
   return (
     <div className="bg-[#14181c] min-h-screen text-[#8b9bab] py-12 font-sans" style={{ fontFamily: 'GraphikWeb, -apple-system, sans-serif' }}>
       <div className="max-w-[800px] mx-auto px-6 flex flex-col gap-10">
-        
+
         {/* CABEÇALHO DO FILME: PÔSTER (ESQUERDA) + INFO (DIREITA) */}
         <div className="flex flex-col md:flex-row gap-8">
-          
+
           {/* PÔSTER PEQUENO FIXO */}
           <div className="w-[200px] shrink-0">
             <div className="rounded-md overflow-hidden border border-gray-700/50 shadow-lg bg-[#1b252d]">
@@ -79,21 +95,16 @@ export default function MovieDetails() {
             </div>
             {/* RATING DO FILME DEBAIXO DO PÔSTER */}
             <div className="mt-4 flex flex-col items-center">
-               <span className="text-[10px] uppercase tracking-wider text-gray-400 mb-1">Comunidade</span>
-               <div className="flex gap-1 text-2xl" title={`${notaMedia.toFixed(1)} estrelas`}>
-                 {[1, 2, 3, 4, 5].map((star) => (
-                   <span key={star} className="relative">
-                     <span className="text-gray-600">★</span>
-                     <span 
-                       className="absolute left-0 text-[#00e054] overflow-hidden whitespace-nowrap"
-                       style={{ width: notaMedia >= star ? '100%' : (notaMedia >= star - 0.5 ? '50%' : '0%') }}
-                     >
-                       ★
-                     </span>
-                   </span>
-                 ))}
-               </div>
-               <span className="text-xs font-semibold text-gray-300 mt-1">{notaMedia.toFixed(1)} / 5</span>
+              <span className="text-[10px] uppercase tracking-wider text-gray-400 mb-1">Ratings</span>
+              <StarRating value={notaMedia} size="1.5rem" />
+              <span className="text-xs font-semibold text-gray-300 mt-1">
+                {notaMedia > 0 ? `${notaMedia.toFixed(1)} / 5` : 'Sem avaliações'}
+              </span>
+              {qtdAvaliacoes > 0 && (
+                <span className="text-[10px] text-gray-500 mt-0.5">
+                  {qtdAvaliacoes.toLocaleString()} {qtdAvaliacoes === 1 ? 'avaliação' : 'avaliações'}
+                </span>
+              )}
             </div>
           </div>
 
@@ -114,13 +125,29 @@ export default function MovieDetails() {
               </p>
             </div>
 
-            {/* BOTÃO PARA LOGAR O FILME */}
-            <div className="mt-4">
-              <button 
+            <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs uppercase tracking-wider text-gray-400">
+              {movie.genero && <span>{movie.genero}</span>}
+              {movie.duracao_minutos && <span>{movie.duracao_minutos} mins</span>}
+            </div>
+
+            {/* AÇÕES: LOG/REVIEW + WATCHLIST */}
+            <div className="mt-4 flex gap-3">
+              <button
                 onClick={() => setIsLogModalOpen(true)}
                 className="bg-[#2c3440] hover:bg-[#445566] text-[#8b9bab] hover:text-white transition-colors py-2 px-4 rounded text-xs font-bold uppercase tracking-widest border border-[#445566] shadow-sm"
               >
                 Review or log...
+              </button>
+              <button
+                onClick={handleToggleWatchlist}
+                disabled={watchlistBusy}
+                className={`transition-colors py-2 px-4 rounded text-xs font-bold uppercase tracking-widest border shadow-sm ${
+                  inWatchlist
+                    ? 'bg-[#00e054] text-white border-[#00e054] hover:bg-[#00c04b]'
+                    : 'bg-[#2c3440] text-[#8b9bab] hover:text-white hover:bg-[#445566] border-[#445566]'
+                }`}
+              >
+                {inWatchlist ? '✓ In Watchlist' : '+ Watchlist'}
               </button>
             </div>
 
@@ -138,9 +165,7 @@ export default function MovieDetails() {
                 <div key={r.sk_movie_review_id} className="bg-[#1b2228] p-4 rounded border border-gray-700/50 text-sm">
                   <div className="flex justify-between items-center mb-2">
                     <strong className="text-gray-300 font-bold text-base">{r.nome}</strong>
-                    <span className="text-[#00e054] text-sm">
-                      {'★'.repeat(Math.floor(r.nota))}{r.nota % 1 !== 0 ? '½' : ''}
-                    </span>
+                    <span className="text-[#00e054] text-sm">{starString(r.nota)}</span>
                   </div>
                   <p className="text-gray-500 text-xs italic mb-3">
                     {new Date(r.created_at || Date.now()).toLocaleDateString()}
@@ -153,9 +178,9 @@ export default function MovieDetails() {
             )}
           </div>
         </div>
-        
+
       </div>
-      {isLogModalOpen && <LogMovieModal initialMovie={movie as any} onClose={handleModalClose} />}
+      {isLogModalOpen && <LogMovieModal initialMovie={movie} onClose={handleModalClose} />}
     </div>
   );
 }

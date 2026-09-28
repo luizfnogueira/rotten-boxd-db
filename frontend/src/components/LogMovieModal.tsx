@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { movieService } from '../services/movieService';
 import type { Movie } from '../types/movie';
+import StarRating from './StarRating';
 import './modal.css';
 
 interface Props {
@@ -15,10 +16,10 @@ export default function LogMovieModal({ onClose, initialMovie = null }: Props) {
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(initialMovie);
 
   const [review, setReview] = useState('');
-  const [rating, setRating] = useState('3.5');
-  
+  const [rating, setRating] = useState(3.5);
+
   const activeUser = localStorage.getItem('activeUser') || 'User';
-  const [name, setName] = useState(activeUser);
+  const [name] = useState(activeUser);
 
   useEffect(() => {
     if (query.length > 2) {
@@ -37,19 +38,9 @@ export default function LogMovieModal({ onClose, initialMovie = null }: Props) {
     if (selectedMovie) {
       await movieService.addReview(selectedMovie.sk_movie_id, {
         nome: name,
-        nota: parseFloat(rating),
+        nota: rating,
         comentario: review
       });
-      
-      // Increment local profile films_count
-      const profileKey = `profile_${name}`;
-      const profileData = localStorage.getItem(profileKey);
-      if (profileData) {
-        const parsed = JSON.parse(profileData);
-        parsed.films_count = (parsed.films_count || 0) + 1;
-        localStorage.setItem(profileKey, JSON.stringify(parsed));
-      }
-      
       onClose();
     }
   };
@@ -103,10 +94,9 @@ export default function LogMovieModal({ onClose, initialMovie = null }: Props) {
                   {selectedMovie?.titulo} <span>{selectedMovie?.ano_lancamento}</span>
                 </h2>
                 <div className="modal-checks">
-                  <label><input type="checkbox" defaultChecked /> Watched on <span>{new Date().toLocaleDateString()}</span></label>
-                  <label><input type="checkbox" /> I've watched this before</label>
+                  <span>Watched on {new Date().toLocaleDateString()}</span>
                 </div>
-                
+
                 <textarea 
                   className="modal-textarea"
                   placeholder="Add a review..."
@@ -116,23 +106,8 @@ export default function LogMovieModal({ onClose, initialMovie = null }: Props) {
 
                 <div className="modal-meta-row">
                   <div className="modal-input-group">
-                    <label>Tags</label>
-                    <input type="text" className="modal-tags-input" placeholder="eg. netflix" />
-                  </div>
-                  
-                  <div className="modal-input-group">
                     <label>Rating</label>
-                    <div style={{ display: 'flex', gap: '2px', fontSize: '1.8rem', cursor: 'pointer' }}>
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <span 
-                          key={star} 
-                          onClick={() => setRating(star.toString())}
-                          style={{ color: star <= parseFloat(rating) ? '#00e054' : '#445566' }}
-                        >
-                          ★
-                        </span>
-                      ))}
-                    </div>
+                    <StarRating value={rating} onChange={setRating} showLabel />
                   </div>
 
                   <div className="modal-input-group">

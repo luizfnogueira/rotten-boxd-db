@@ -8,7 +8,7 @@ export default function Home() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const size = 14; // Mudado de 18 para 14 para fechar 2 linhas de 7 certinho
+  const size = 15; // 3 linhas completas de 5 filmes
 
   useEffect(() => {
     const fetchMovies = async () => {
@@ -33,7 +33,7 @@ export default function Home() {
         <h2 className="text-xl text-gray-300 font-serif tracking-wide uppercase">Populares</h2>
         
         <div className="relative">
-          <input 
+          <input
             type="text" 
             className="bg-[#1b2228] border border-gray-700/50 rounded-full px-5 py-2 text-sm text-gray-300 focus:outline-none focus:border-[#00e054] w-64 transition-colors" 
             placeholder="Procurar filme..." 
@@ -46,11 +46,14 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="grid mt-6" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '2rem' }}>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 mt-6" style={{ gap: '2rem' }}>
         {movies.map(movie => (
           <MovieCard key={movie.sk_movie_id} movie={movie} />
         ))}
       </div>
+      {movies.length === 0 && (
+        <div className="text-center py-16 text-gray-500 italic">Nenhum filme encontrado.</div>
+      )}
 
       <div className="flex justify-center items-center gap-8 mt-16 pt-8 border-t border-[#2c3440] pb-12">
         <button 

@@ -1,9 +1,11 @@
 from app.db.base import Base
 from app.movies import models  # noqa: F401  Registra os modelos ORM.
+from app.users import models as users_models  # noqa: F401  Registra os modelos ORM.
 
 
 def test_movie_schema_registers_expected_tables() -> None:
     expected_tables = {
+        "app_users",
         "bridge_movie_company",
         "bridge_movie_genre",
         "bridge_movie_person",
@@ -14,6 +16,7 @@ def test_movie_schema_registers_expected_tables() -> None:
         "dim_reviews",
         "fact_movies_performance",
         "movie_reviews",
+        "watchlist_items",
     }
 
     assert set(Base.metadata.tables) == expected_tables

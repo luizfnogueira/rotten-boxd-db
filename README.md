@@ -6,6 +6,18 @@ Desenvolvido por **luizfnogueira**.
 
 ---
 
+## Funcionalidades
+
+* **Catálogo paginado** de filmes com barra de pesquisa por título;
+* **Cadastro, edição e remoção** de filmes (painel Admin);
+* **Página de detalhes** com pôster, diretor, ano, gênero, duração, sinopse, média das avaliações e reviews da comunidade;
+* **Avaliações com meia estrela** (1 a 5, em passos de 0.5, estilo Letterboxd) acompanhadas de resenha em texto;
+* **Watchlist**: adicione/remova filmes que deseja assistir direto da página do filme;
+* **Perfil do usuário** com informações editáveis (username, bio, localização), métricas reais (filmes assistidos, reviews, watchlist, nota média) e listagem das próprias reviews e da watchlist;
+* **Login simplificado** por username (o usuário é criado automaticamente no backend).
+
+---
+
 ## Diferenciais Técnicos e Arquitetura
 
 ### Arquitetura de Código e Organização
@@ -61,11 +73,12 @@ pip install -r requirements.txt
 
 ---
 
-### 2. Popular o Banco de Dados (Carga Inicial / Seed)
+### 2. Migrar e Popular o Banco de Dados (Alembic + Seed)
 
-Com o ambiente virtual ativo, execute a carga inicial dos dados para popular o banco SQLite local com filmes e metadados:
+Com o ambiente virtual ativo, aplique as migrações do Alembic e execute a carga inicial dos dados para popular o banco SQLite local com filmes e metadados:
 
 ```powershell
+alembic upgrade head
 python -m app.db.seed
 ```
 
