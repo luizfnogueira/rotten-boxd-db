@@ -14,7 +14,7 @@ export function MovieCard({ movie }: MovieCardProps) {
       <img src={posterUrl} alt={movie.titulo} className="movie-poster" />
       <div className="movie-meta">
         <span className="stars">
-          {movie.media_avaliacoes ? '★'.repeat(Math.round(movie.media_avaliacoes)) : ''}
+          {/* Rating is available only in the details endpoint for now */}
         </span>
       </div>
     </Link>

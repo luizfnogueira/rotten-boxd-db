@@ -18,9 +18,7 @@ export default function MovieDetails() {
     try {
       const data = await movieService.getMovieById(id);
       setMovie(data);
-      // Depending on backend, reviews might be inside data.reviews or need a separate call
-      const reviewsData = await movieService.getMovieReviews(id);
-      setReviews(reviewsData);
+      setReviews(data.reviews || []);
     } catch (error) {
       console.error('Error loading movie:', error);
     }
