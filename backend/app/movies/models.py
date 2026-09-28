@@ -104,6 +104,8 @@ class DimMovie(Base):
     sinopse: Mapped[str | None] = mapped_column(String(4000), default=None)
     url_poster: Mapped[str | None] = mapped_column(String(2048), default=None)
     url_backdrop: Mapped[str | None] = mapped_column(String(2048), default=None)
+    diretor: Mapped[str | None] = mapped_column(String(255), default=None)
+    genero: Mapped[str | None] = mapped_column(String(255), default=None)
 
     genres: Mapped[list["DimGenre"]] = relationship(
         secondary=bridge_movie_genre, back_populates="movies", order_by="DimGenre.nome_genero"
@@ -213,7 +215,7 @@ class MovieReview(Base):
     """Avaliação individual de um filme na escala de 0 a 10."""
 
     __tablename__ = "movie_reviews"
-    __table_args__ = (CheckConstraint("nota >= 0 AND nota <= 10", name="nota_range"),)
+    __table_args__ = (CheckConstraint("nota IN (1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0)", name="nota_range"),)
 
     sk_movie_review_id: Mapped[str] = mapped_column(
         String(64), primary_key=True, default=generate_surrogate_key
