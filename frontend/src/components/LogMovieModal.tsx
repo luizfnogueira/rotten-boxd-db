@@ -108,15 +108,18 @@ export default function LogMovieModal({ onClose }: Props) {
                   </div>
                   
                   <div className="modal-input-group">
-                    <label>Rating (1-5)</label>
-                    <input 
-                      type="number" 
-                      min="1" max="5" step="0.5" 
-                      className="modal-tags-input" 
-                      style={{ width: '80px' }} 
-                      value={rating}
-                      onChange={e => setRating(e.target.value)}
-                    />
+                    <label>Rating</label>
+                    <div style={{ display: 'flex', gap: '2px', fontSize: '1.8rem', cursor: 'pointer' }}>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <span 
+                          key={star} 
+                          onClick={() => setRating(star.toString())}
+                          style={{ color: star <= parseFloat(rating) ? '#00e054' : '#445566' }}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
                   </div>
 
                   <div className="modal-input-group">

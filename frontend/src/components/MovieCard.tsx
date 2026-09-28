@@ -10,7 +10,7 @@ export function MovieCard({ movie }: MovieCardProps) {
   const posterUrl = movie.url_poster || 'https://placehold.co/300x450/1b252d/ffffff?text=Poster';
 
   return (
-    <Link to={`/movies/${movie.sk_movie_id}`} className="movie-card">
+    <Link to={`/movie/${movie.sk_movie_id}`} className="movie-card">
       <img src={posterUrl} alt={movie.titulo} className="movie-poster" />
       <div className="movie-meta">
         <span className="stars">

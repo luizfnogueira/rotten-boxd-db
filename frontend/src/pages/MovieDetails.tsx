@@ -45,81 +45,116 @@ export default function MovieDetails() {
   if (!movie) return <div>Loading...</div>;
 
   return (
-    <div className="details-layout">
-      <div className="details-poster">
+    <div style={{ display: 'flex', gap: '40px', marginTop: '20px' }}>
+      <div style={{ width: '250px', flexShrink: 0 }}>
         <img 
           src={movie.url_poster || 'https://placehold.co/300x450/1b252d/ffffff?text=Poster'} 
           alt={movie.titulo} 
-          className="movie-poster"
+          style={{ width: '100%', borderRadius: '4px', boxShadow: '0 0 10px rgba(0,0,0,0.5)', border: '1px solid #445566' }}
         />
-      </div>
-      <div className="details-info">
-        <h1 className="details-title">{movie.titulo} <span style={{color: 'var(--text-muted)'}}>{movie.ano_lancamento}</span></h1>
-        
         {movie.reviews_summary?.nota_media_usuarios && (
-          <div className="details-rating" style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '10px 0' }}>
-            <span className="stars" style={{ fontSize: '1.2rem' }}>
-              {'★'.repeat(Math.round(movie.reviews_summary.nota_media_usuarios))}
-            </span>
-            <span style={{ color: 'var(--text-muted)' }}>
-              {movie.reviews_summary.nota_media_usuarios.toFixed(1)} / 5.0 ({movie.reviews_summary.qtd_avaliacoes_usuarios} reviews)
-            </span>
+          <div style={{ marginTop: '15px', textAlign: 'center', background: '#2c3440', padding: '10px', borderRadius: '4px' }}>
+            <div style={{ fontSize: '0.8rem', color: '#8b9bab', textTransform: 'uppercase' }}>Ratings</div>
+            <div style={{ fontSize: '1.5rem', color: '#00e054', fontWeight: 'bold' }}>
+              {movie.reviews_summary.nota_media_usuarios.toFixed(1)} <span style={{fontSize: '1rem', color: '#8b9bab'}}>/ 5.0</span>
+            </div>
           </div>
         )}
+      </div>
+
+      <div style={{ flexGrow: 1 }}>
+        <h1 style={{ margin: '0 0 10px 0', fontSize: '2.5rem', fontFamily: 'serif' }}>
+          {movie.titulo} <span style={{ fontSize: '1.2rem', color: '#8b9bab', fontWeight: 'normal', fontFamily: 'sans-serif' }}>{movie.ano_lancamento}</span>
+        </h1>
         
         {movie.diretor && (
-          <div className="details-director">
-            Directed by <strong>{movie.diretor}</strong>
+          <div style={{ fontSize: '1rem', color: '#8b9bab', marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #445566' }}>
+            Directed by <strong style={{ color: '#c0c9d1' }}>{movie.diretor}</strong>
           </div>
         )}
         
-        <p className="details-synopsis">{movie.sinopse}</p>
+        <p style={{ fontSize: '1.1rem', lineHeight: '1.6', color: '#9ab' }}>
+          {movie.sinopse}
+        </p>
 
-        <div className="section-title">Add a Review</div>
-        <form onSubmit={handleSubmitReview} className="review-form">
-          <input 
-            type="text" 
-            placeholder="Your Name" 
-            value={nome} 
-            onChange={(e) => setNome(e.target.value)} 
-            required 
-          />
-          <div style={{ marginBottom: '1rem' }}>
-            <label>Rating (1 to 5): </label>
-            <input 
-              type="number" 
-              min="1" max="5" step="0.5" 
-              value={nota} 
-              onChange={(e) => setNota(parseFloat(e.target.value))} 
-              style={{ width: '80px', display: 'inline', marginLeft: '10px' }}
+        {movie.genero && (
+          <div style={{ marginTop: '20px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            {movie.genero.split(',').map((g, i) => (
+              <span key={i} style={{ background: '#2c3440', color: '#8b9bab', padding: '4px 8px', borderRadius: '3px', fontSize: '0.8rem', textTransform: 'uppercase' }}>
+                {g.trim()}
+              </span>
+            ))}
+          </div>
+        )}
+
+        <div style={{ marginTop: '40px' }}>
+          <h3 style={{ textTransform: 'uppercase', color: '#8b9bab', fontSize: '0.9rem', borderBottom: '1px solid #445566', paddingBottom: '5px' }}>Add a Review</h3>
+          <form onSubmit={handleSubmitReview} style={{ background: '#2c3440', padding: '20px', borderRadius: '4px', marginTop: '15px' }}>
+            <div style={{ display: 'flex', gap: '20px', marginBottom: '15px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', color: '#8b9bab', marginBottom: '5px' }}>Your Name</label>
+                <input 
+                  type="text" 
+                  style={{ background: '#1b2228', border: '1px solid #445566', color: '#fff', padding: '8px', borderRadius: '3px' }}
+                  value={nome} 
+                  onChange={(e) => setNome(e.target.value)} 
+                  required 
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', color: '#8b9bab', marginBottom: '5px' }}>Rating</label>
+                <div style={{ display: 'flex', gap: '2px', fontSize: '1.5rem', cursor: 'pointer' }}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <span 
+                      key={star} 
+                      onClick={() => setNota(star)}
+                      style={{ color: star <= nota ? '#00e054' : '#445566' }}
+                    >★</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <textarea 
+              placeholder="Write your review..." 
+              style={{ width: '100%', background: '#1b2228', border: '1px solid #445566', color: '#fff', padding: '10px', borderRadius: '3px', minHeight: '80px', marginBottom: '15px' }}
+              value={comentario} 
+              onChange={(e) => setComentario(e.target.value)} 
               required 
             />
-          </div>
-          <textarea 
-            placeholder="Write your review..." 
-            rows={4} 
-            value={comentario} 
-            onChange={(e) => setComentario(e.target.value)} 
-            required 
-          />
-          <button type="submit" className="btn-log">Save</button>
-        </form>
+            <div style={{ textAlign: 'right' }}>
+              <button type="submit" style={{ background: '#00e054', color: '#fff', border: 'none', padding: '8px 20px', borderRadius: '3px', fontWeight: 'bold', cursor: 'pointer' }}>Save Review</button>
+            </div>
+          </form>
+        </div>
 
-        <div className="section-title">Reviews</div>
-        <div>
-          {reviews.length === 0 ? <p>No reviews yet.</p> : (
-            reviews.map(r => (
-              <div key={r.sk_movie_review_id} style={{ borderBottom: '1px solid var(--border-color)', padding: '1rem 0' }}>
-                <div>
-                  <strong style={{ color: 'var(--text-main)' }}>{r.nome}</strong> 
-                  <span className="stars" style={{ marginLeft: '10px' }}>
-                    {'★'.repeat(Math.round(r.nota))}
-                  </span>
+        <div style={{ marginTop: '40px' }}>
+          <h3 style={{ textTransform: 'uppercase', color: '#8b9bab', fontSize: '0.9rem', borderBottom: '1px solid #445566', paddingBottom: '5px' }}>Reviews</h3>
+          <div style={{ marginTop: '15px' }}>
+            {reviews.length === 0 ? <p style={{ color: '#8b9bab' }}>No reviews yet. Be the first!</p> : (
+              reviews.map(r => (
+                <div key={r.sk_movie_review_id} style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #2c3440', display: 'flex', gap: '15px' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#445566', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: '#fff', flexShrink: 0 }}>
+                    {r.nome.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.9rem', color: '#8b9bab' }}>
+                      Review by <strong style={{ color: '#fff' }}>{r.nome}</strong>
+                    </div>
+                    <div style={{ color: '#00e054', fontSize: '1.2rem', margin: '5px 0' }}>
+                      {'★'.repeat(Math.round(r.nota))}
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: '#8b9bab', marginBottom: '10px' }}>
+                      Watched on {new Date(r.created_at || Date.now()).toLocaleDateString()}
+                    </div>
+                    <p style={{ color: '#c0c9d1', lineHeight: '1.5', margin: 0 }}>{r.comentario}</p>
+                    <div style={{ marginTop: '15px', color: '#8b9bab', fontSize: '0.8rem', cursor: 'pointer' }}>
+                      ♥ Like review
+                    </div>
+                  </div>
                 </div>
-                <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>{r.comentario}</p>
-              </div>
-            ))
-          )}
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>
