@@ -2,16 +2,26 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Home from './pages/Home';
 import MovieDetails from './pages/MovieDetails';
 import Admin from './pages/Admin';
-import './App.css';
 
 function App() {
   return (
     <Router>
-      <nav style={{ padding: '1rem', background: '#333', color: 'white' }}>
-        <Link to="/" style={{ marginRight: '1rem', color: 'white', textDecoration: 'none' }}>Catálogo</Link>
-        <Link to="/admin" style={{ color: 'white', textDecoration: 'none' }}>Gerenciamento</Link>
-      </nav>
-      <main style={{ padding: '2rem' }}>
+      <header className="topbar">
+        <Link to="/" className="brand">
+          <div className="brand-dots">
+            <div className="dot orange"></div>
+            <div className="dot green"></div>
+            <div className="dot blue"></div>
+          </div>
+          RottenBoxd
+        </Link>
+        <div className="nav-links">
+          <Link to="/">Filmes</Link>
+          <Link to="/admin">Admin</Link>
+          <button className="btn-log">+ Log</button>
+        </div>
+      </header>
+      <main className="app-container">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/movies/:id" element={<MovieDetails />} />
