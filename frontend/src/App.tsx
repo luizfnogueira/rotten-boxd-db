@@ -18,7 +18,7 @@ function App() {
         <div className="nav-links">
           <Link to="/">Filmes</Link>
           <Link to="/admin">Admin</Link>
-          <button className="btn-log">+ Log</button>
+          <Link to="/admin" className="btn-log" style={{textDecoration: 'none'}}>+ Log</Link>
         </div>
       </header>
       <main className="app-container">
