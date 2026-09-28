@@ -1,34 +1,37 @@
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Routes, Route, Link } from 'react-router-dom';
 import Home from './pages/Home';
 import MovieDetails from './pages/MovieDetails';
 import Admin from './pages/Admin';
+import LogMovieModal from './components/LogMovieModal';
+import './App.css';
 
 function App() {
+  const [isLogOpen, setIsLogOpen] = useState(false);
+
   return (
-    <Router>
-      <header className="topbar">
-        <Link to="/" className="brand">
-          <div className="brand-dots">
-            <div className="dot orange"></div>
-            <div className="dot green"></div>
-            <div className="dot blue"></div>
-          </div>
-          RottenBoxd
-        </Link>
+    <div className="app-wrapper">
+      <header className="app-header">
+        <div className="logo">
+          <span className="dots"><span className="dot orange"></span><span className="dot green"></span><span className="dot blue"></span></span>
+          <span className="title">RottenBoxd</span>
+        </div>
         <div className="nav-links">
           <Link to="/">Filmes</Link>
           <Link to="/admin">Admin</Link>
-          <Link to="/admin" className="btn-log" style={{textDecoration: 'none'}}>+ Log</Link>
+          <button className="btn-log" onClick={() => setIsLogOpen(true)}>+ Log</button>
         </div>
       </header>
       <main className="app-container">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/movies/:id" element={<MovieDetails />} />
+          <Route path="/movie/:id" element={<MovieDetails />} />
           <Route path="/admin" element={<Admin />} />
         </Routes>
       </main>
-    </Router>
+      
+      {isLogOpen && <LogMovieModal onClose={() => setIsLogOpen(false)} />}
+    </div>
   );
 }
 
