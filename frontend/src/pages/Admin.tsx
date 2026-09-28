@@ -1,11 +1,16 @@
 import { useState, useEffect } from 'react';
 import { movieService } from '../services/movieService';
-import type { Movie } from '../types/movie';
+import type { Movie, MovieCreateData } from '../types/movie';
 
 export default function Admin() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [page, setPage] = useState(1);
   const size = 50;
+
+  const [titulo, setTitulo] = useState('');
+  const [ano, setAno] = useState('');
+  const [url_poster, setUrlPoster] = useState('');
+  const [diretor, setDiretor] = useState('');
 
   const loadMovies = async () => {
     try {
@@ -31,9 +36,39 @@ export default function Admin() {
     }
   };
 
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const data: MovieCreateData = {
+        id_filme: Date.now().toString(),
+        titulo,
+        ano_lancamento: parseInt(ano) || undefined,
+        url_poster,
+        diretor,
+      };
+      await movieService.createMovie(data);
+      setTitulo('');
+      setAno('');
+      setUrlPoster('');
+      setDiretor('');
+      loadMovies();
+    } catch (error) {
+      console.error('Error creating movie:', error);
+    }
+  };
+
   return (
     <div>
-      <div className="section-title">Admin Panel - Manage Films</div>
+      <div className="section-title">Log a New Film</div>
+      <form onSubmit={handleCreate} className="review-form" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <input type="text" placeholder="Title" value={titulo} onChange={e => setTitulo(e.target.value)} required />
+        <input type="number" placeholder="Year" value={ano} onChange={e => setAno(e.target.value)} />
+        <input type="text" placeholder="Poster URL" value={url_poster} onChange={e => setUrlPoster(e.target.value)} />
+        <input type="text" placeholder="Director" value={diretor} onChange={e => setDiretor(e.target.value)} />
+        <button type="submit" className="btn-log" style={{ gridColumn: 'span 2' }}>+ Log Film</button>
+      </form>
+
+      <div className="section-title">Manage Films</div>
       
       <table className="admin-table">
         <thead>
